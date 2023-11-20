@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -27,41 +26,19 @@ public class WebServer {
             Map<String, MyWebApplication> router = new HashMap<>();
             router.put("/calculator", new CalculatorWebApplication());
             router.put("/greetings", new GreetingsWebApplication());
-
             serv = Executors.newFixedThreadPool(6);
-
             while (true) {
-                serv.execute(() -> {
-                    try (Socket socket = serverSocket.accept()) {
-                        logger.info("Клиент подключился");
-                        byte[] buffer = new byte[4096];
-                        int n = socket.getInputStream().read(buffer);
-                        String rawRequest = new String(buffer, 0, n);
-                        Request request = new Request(rawRequest);
-                        logger.info("Получен запрос:");
-                        request.show();
-                        boolean executed = false;
-                        for (Map.Entry<String, MyWebApplication> e : router.entrySet()) {
-                            if (request.getUri().startsWith(e.getKey())) {
-                                e.getValue().execute(request, socket.getOutputStream());
-                                executed = true;
-                                break;
-                            }
-                        }
-                        if (!executed) {
-                            socket.getOutputStream().write(("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Unknown application</h1></body></html>").getBytes(StandardCharsets.UTF_8));
-                        }
-                    } catch (IOException e) {
-                        logger.error(e.getStackTrace());
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
-                });
+                try  {
+                    Socket socket = serverSocket.accept();
+                    Handler handler = new Handler(socket, router, logger);
+                    serv.execute(handler::run);
 
+                } catch (IOException e) {
+                    logger.error("Main: " + e.getMessage());
+                }
             }
-
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }

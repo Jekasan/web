@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Request {
+public class Request{
     private String uri;
     private String raw;
     private Map<String, String> params;
@@ -50,10 +50,8 @@ public class Request {
         return out;
     }
 
-    public void show() {
-        logger.info("Запрос:");
-        logger.info("uri: " + uri);
-        logger.info("params: " + params);
+    public String show() {
+        return "Запрос:" +"\nuri: " + uri + "\nparams: " + params;
     }
 
     public String getParam(String key) {
