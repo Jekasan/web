@@ -1,13 +1,17 @@
 package ru.fisunov.http.server;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Request {
+public class Request{
     private String uri;
     private String raw;
     private Map<String, String> params;
+    private static final Logger logger = LogManager.getLogger(Request.class);
 
     public String getUri() {
         return uri;
@@ -46,10 +50,8 @@ public class Request {
         return out;
     }
 
-    public void show() {
-        System.out.println("Запрос:");
-        System.out.println("uri: " + uri);
-        System.out.println("params: " + params);
+    public String show() {
+        return "Запрос:" +"\nuri: " + uri + "\nparams: " + params;
     }
 
     public String getParam(String key) {
